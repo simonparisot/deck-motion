@@ -4,18 +4,18 @@ description: |
   Build an animated web presentation that behaves like slides: a fixed scaled
   stage, screens in plain HTML/CSS/JS with no dependencies, step animations
   driven by a click or by the clock, speaker notes, contents panel, timer.
-  Made for a 30 to 45 minute talk as much as for a three minute video. Ships a
-  working template, the browser verification method, video export with a
-  soundtrack, and deployment. Use it when someone asks for a presentation deck
-  that is "not a PowerPoint", a web motion design, an animated slideshow, or
-  the video export of one.
+  Made for a 30 to 45 minute talk, and for any deck that should carry a spoken
+  presentation rather than be read. Ships a working template, editorial limits
+  with a tool that measures them, the browser verification method, and
+  deployment. Use it when someone asks for a presentation deck that is "not a
+  PowerPoint", a web motion design, or an animated slideshow.
 ---
 
 # Animated web presentation
 
 The goal: a deck with the finish of a motion design and the flexibility of
 slides. No dependencies, no build, one file to open. You drive it from the
-keyboard during a talk, or let it run on its own to make a video.
+keyboard during a talk, or let it run on its own on a lobby screen.
 
 > **Read `references/writing.md` before writing anything.**
 > A deck that backs a talk is **very light**: one idea per slide, fifteen words
@@ -55,7 +55,7 @@ nobody notices before the room does.
 
 **Steps, not a timeline.** Each slide declares its steps. In presenter mode they
 advance on a click, in auto mode they follow a clock. The same slide code serves
-both. That is what makes a deck reusable as a video without rewriting it.
+both, so a deck can run unattended without being rewritten.
 
 ## The workflow
 
@@ -70,8 +70,7 @@ both. That is what makes a deck reusable as a video without rewriting it.
    shrunk.
 5. **Verify in a browser, never by reading the code.** See
    `references/verifying.md`. This is the part people skip and regret.
-6. **Export if needed**: video, soundtrack, deployment. See
-   `references/export.md`.
+6. **Deploy if needed.** See `references/deploying.md`.
 
 ## The references
 
@@ -82,7 +81,7 @@ both. That is what makes a deck reusable as a video without rewriting it.
 | `references/slides.md` | Write a slide, animate, the drawing traps |
 | `references/talks.md` | A 30 to 45 minute deck, presenter mode |
 | `references/verifying.md` | **Before shipping anything** |
-| `references/export.md` | Video, music, deployment on S3 + CloudFront |
+| `references/deploying.md` | Serving the deck, and what bites |
 
 ## What costs a lot when ignored
 

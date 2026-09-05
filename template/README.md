@@ -22,7 +22,7 @@ Standalone deck, no dependencies and no build. Double-click `index.html`.
 - **The running order** → the `SLIDES` array: order, titles, chapters, notes.
 - **How many steps a slide has** → the length of its `steps` array.
 - **Overall pacing** → `TEMPO`. 1.3 slows everything by 30 %.
-- **Turn it into a video** → `MODE = 'auto'`.
+- **Run it unattended** → `MODE = 'auto'`.
 
 ## Special URLs
 

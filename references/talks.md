@@ -1,7 +1,7 @@
 # A 30 to 45 minute talk
 
-This is not a long video. The pace comes from the speaker, not from a clock.
-Three things change.
+A deck that carries a talk is not a deck that plays itself. The pace comes from
+the speaker, not from a clock. Three things change.
 
 ## 1. The mode
 
@@ -12,7 +12,7 @@ var NOTES_AT_START = false; // true when rehearsing
 ```
 
 `seconds` on each slide becomes decorative: it only matters in auto mode. Fill it
-in anyway if you expect to export a video one day.
+in anyway if the deck might one day run unattended on a screen.
 
 ## 2. The controls in the room
 

@@ -2,7 +2,8 @@
    Figures, running order, speaker notes, pacing. */
 
 /* 'presenter' : you click through, each step reveals one element.
-   'auto'      : everything runs on a clock, like a video. */
+   'auto'      : everything runs on a clock, for a screen with nobody
+                 in front of it. */
 var MODE = 'presenter';
 
 /* Multiplies every duration and delay. 1.3 slows everything by 30 %. */

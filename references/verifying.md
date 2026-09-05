@@ -118,15 +118,19 @@ character, and presentation copy is full of `’`.
 When you compare two versions, measure. But **first check the measurement says
 something**, on a case whose answer you already know.
 
-A real example: to compare the smoothness of two videos, count frames identical
-to the previous one. Compared bit for bit, two frames of an h264 recording are
-never identical — codec noise was inflating one source's score. The fix: compare
-a thresholded signature, then **check on a passage where nothing moves** that
-both sources report 100 % frozen. A measurement that fails that check is worth
-nothing.
+A real example, from `tools/audit.sh` itself. The first version measured the
+smallest rendered font on a slide and flagged anything under 24 px. Every chart
+slide failed — on its axis labels, which are two characters long and which nobody
+reads as prose. The measurement was counting the wrong thing, and had it been
+trusted it would have pushed every axis label to 24 px and wrecked the charts.
 
-The same principle holds everywhere: sound levels in RMS rather than by ear, sync
-by correlation rather than by eye, and a control case every time.
+The fix was to define what is being measured: body size only applies to blocks of
+three words or more, and numeric labels do not count as words at all. Then the
+template, which is meant to be exemplary, passed 5 out of 5.
+
+The lesson generalises: before trusting a measurement, run it on a case whose
+answer you already know. A metric that flags something you are sure is fine is
+telling you about itself, not about the deck.
 
 ## After deploying
 

@@ -78,10 +78,11 @@ for a click.
 `←` goes back a step, then to the previous slide on its last step. No clock.
 
 **auto** — steps fire on their delays, the slide changes after `seconds`. This is
-video mode.
+the mode for a screen with nobody in front of it: a lobby display, a stand, a
+loop between two sessions.
 
 The same slide code serves both. That is deliberate: a talk deck must be able to
-become a video without a rewrite.
+run unattended without a rewrite.
 
 ## The tempo
 
