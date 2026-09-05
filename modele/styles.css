@@ -1,0 +1,156 @@
+/* Canvas fixe 1600 × 900, mis à l'échelle par app.js.
+   Tout se mesure en pixels de ce canvas : la mise en page ne se recompose
+   jamais, elle est identique du portable au vidéoprojecteur. */
+
+:root{
+  --fond-0:#0B0817;
+  --fond-1:#120E24;
+  --fond-2:#1D1439;
+
+  --vif:#8BE9FD;            /* la couleur du sujet, le chiffre héros */
+  --appui:#F1FA8C;          /* données secondaires */
+  --tension:#FF6E6E;        /* alerte, concurrence */
+
+  --encre:#FFFFFF;
+  --encre-2:rgba(255,255,255,.66);
+  --encre-3:rgba(255,255,255,.38);
+  --encre-4:rgba(255,255,255,.14);
+
+  --ease:cubic-bezier(.16,1,.3,1);
+  --marge-x:96px;
+  --marge-y:74px;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:var(--fond-0)}
+body{
+  font-family:"Inter","Helvetica Neue",Helvetica,-apple-system,BlinkMacSystemFont,
+              "Segoe UI",Roboto,Arial,sans-serif;
+  color:var(--encre);
+  font-variant-numeric:tabular-nums;
+  -webkit-font-smoothing:antialiased;
+}
+
+#cadre{position:fixed;inset:0;overflow:hidden}
+#scene{
+  position:absolute;left:50%;top:50%;
+  width:1600px;height:900px;transform-origin:center center;
+  background:
+    radial-gradient(120% 90% at 78% 12%, rgba(139,233,253,.10) 0%, transparent 55%),
+    linear-gradient(155deg, var(--fond-2) 0%, var(--fond-1) 46%, var(--fond-0) 100%);
+  overflow:hidden;isolation:isolate;
+}
+
+/* ---- Squelette d'écran ---- */
+.ecran{
+  position:absolute;inset:0;z-index:10;
+  padding:var(--marge-y) var(--marge-x);
+  display:none;flex-direction:column;opacity:0;
+}
+.ecran.est-actif{display:flex;animation:entreEcran .28s var(--ease) both}
+.ecran.est-sorti{display:flex;animation:sortEcran .2s ease both;z-index:9}
+@keyframes entreEcran{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+@keyframes sortEcran{from{opacity:1}to{opacity:0}}
+
+/* Un élément marqué .a apparaît quand sa classe pas-N est posée.
+   Le délai --d sert au mode auto ; en présentateur il reste à zéro. */
+.a{opacity:0}
+.pas-1 .a[data-pas="1"],.pas-2 .a[data-pas="2"],.pas-3 .a[data-pas="3"],
+.pas-4 .a[data-pas="4"],.pas-5 .a[data-pas="5"],.pas-6 .a[data-pas="6"]{
+  animation:apparait .6s calc(var(--d,0s) * var(--tempo,1)) both var(--ease);
+}
+@keyframes apparait{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+
+/* ---- Typographie ---- */
+.titre{font-size:56px;font-weight:700;line-height:1.1;letter-spacing:-.03em;max-width:1240px}
+.sous-titre{font-size:27px;color:var(--encre-2);margin-top:16px;max-width:1100px}
+.heros{display:block;font-size:180px;font-weight:800;line-height:.88;
+  letter-spacing:-.045em;color:var(--vif)}
+.chiffre{display:block;font-size:56px;font-weight:800;letter-spacing:-.03em;color:var(--vif)}
+.legende{display:block;font-size:24px;font-weight:500;line-height:1.35;
+  color:var(--encre-2);margin-top:12px;max-width:380px}
+.rangee{display:flex;gap:70px;align-items:flex-end;margin-top:30px}
+.centre{align-items:center;justify-content:center;text-align:center}
+
+/* ---- Grille de points ---- */
+.grille{display:grid;gap:7px;width:max-content}
+.grille .point{width:12px;height:12px;border-radius:50%;
+  background:var(--encre-4);transition:background .35s var(--ease)}
+.grille .point.vif{background:var(--vif)}
+
+/* ---- Courbe ---- */
+.zone-courbe{position:relative;height:300px;margin-top:auto}
+.zone-courbe svg{width:100%;height:100%;overflow:visible;color:var(--vif)}
+.courbe-aire{fill:url(#aireCourbe)}
+.courbe-trait{fill:none;stroke:var(--vif);stroke-width:3;
+  stroke-linecap:round;stroke-linejoin:round}
+.courbe-axe{stroke:rgba(255,255,255,.12);stroke-width:1}
+.annees{display:flex;justify-content:space-between;font-size:17px;color:var(--encre-3);margin-top:8px}
+
+/* ---- Chrome ---- */
+#chrome{position:fixed;inset:0;z-index:200;pointer-events:none}
+#progression{position:absolute;top:0;left:0;right:0;height:4px;display:flex;gap:2px;
+  pointer-events:auto;cursor:pointer;background:rgba(255,255,255,.07)}
+#progression i{flex:1 1 auto;background:rgba(255,255,255,.10);transition:background .25s}
+#progression i.faite{background:rgba(139,233,253,.5)}
+#progression i.active{background:var(--vif)}
+#progression:hover{height:8px;transition:height .15s}
+
+#boutons{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);
+  display:flex;gap:6px;pointer-events:auto;opacity:0;transition:opacity .25s}
+body.montre-ui #boutons,#boutons:hover{opacity:1}
+#boutons button{width:38px;height:38px;border:0;border-radius:10px;cursor:pointer;
+  background:rgba(255,255,255,.09);color:var(--encre-2);
+  font:inherit;font-size:16px;display:grid;place-items:center;backdrop-filter:blur(6px)}
+#boutons button:hover{background:var(--vif);color:#12102A}
+
+#minuteur{position:absolute;right:26px;bottom:20px;font-size:14px;color:var(--encre-3);
+  font-variant-numeric:tabular-nums}
+#minuteur.depasse{color:var(--tension)}
+
+/* ---- Notes de l'orateur ---- */
+#notes{position:fixed;z-index:250;left:0;right:0;bottom:0;
+  padding:18px 26px 20px;background:rgba(8,6,18,.94);backdrop-filter:blur(10px);
+  border-top:1px solid rgba(255,255,255,.12);
+  transform:translateY(101%);transition:transform .28s var(--ease)}
+body.avec-notes #notes{transform:none}
+body.avec-notes #scene{transform-origin:center 34%}
+#notes-entete{display:flex;gap:20px;font-size:13px;color:var(--encre-3);margin-bottom:8px}
+#notes-texte{font-size:19px;line-height:1.45;color:var(--encre);white-space:pre-wrap;
+  max-height:180px;overflow:auto}
+
+/* ---- Sommaire ---- */
+#sommaire{position:fixed;inset:0;z-index:300;overflow:auto;padding:48px;
+  background:rgba(8,6,18,.95);backdrop-filter:blur(10px)}
+#sommaire-dedans{max-width:960px;margin:0 auto}
+#sommaire h3{font-size:26px;font-weight:700;margin-bottom:20px}
+#sommaire-total{font-size:15px;font-weight:400;color:var(--encre-3);margin-left:12px}
+#sommaire-liste{list-style:none;columns:2;column-gap:32px}
+#sommaire-liste li{break-inside:avoid}
+.sommaire-chapitre{font-size:13px;text-transform:uppercase;letter-spacing:.12em;
+  color:var(--vif);margin:18px 0 8px;break-after:avoid}
+#sommaire-liste li button{width:100%;text-align:left;display:flex;gap:14px;
+  padding:9px 12px;border:0;border-radius:9px;cursor:pointer;
+  background:transparent;color:var(--encre-2);font:inherit;font-size:17px}
+#sommaire-liste li button:hover{background:rgba(255,255,255,.07);color:var(--encre)}
+#sommaire-liste li.est-ici button{background:rgba(139,233,253,.14);color:var(--encre)}
+#sommaire-liste b{color:var(--encre-3);font-weight:600;min-width:26px}
+#sommaire-aide{margin-top:28px;font-size:14px;color:var(--encre-3)}
+#sommaire-fermer{margin-top:22px;padding:10px 20px;border:0;border-radius:9px;cursor:pointer;
+  background:rgba(255,255,255,.10);color:var(--encre);font:inherit}
+kbd{font:inherit;font-size:12px;padding:2px 7px;border-radius:5px;
+  background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.14)}
+
+/* ---- Écran noir, pour reprendre la parole ---- */
+body.ecran-noir #cadre,body.ecran-noir #chrome{opacity:0;transition:opacity .2s}
+body.ecran-noir{background:#000;cursor:none}
+
+/* ---- Mouvement réduit ---- */
+html.reduit *,html.reduit *::before,html.reduit *::after{
+  animation-duration:.01ms !important;animation-delay:0ms !important;
+  transition-duration:.01ms !important;transition-delay:0ms !important}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{
+    animation-duration:.01ms !important;animation-delay:0ms !important;
+    transition-duration:.01ms !important;transition-delay:0ms !important}
+}
