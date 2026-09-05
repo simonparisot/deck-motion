@@ -1,4 +1,4 @@
-.outils/
+.tools/
 .video/
 node_modules/
 *.mp4

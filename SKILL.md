@@ -1,114 +1,114 @@
 ---
 name: deck-motion
 description: |
-  Construire une présentation web animée qui se contrôle comme des slides : canvas fixe
-  mis à l'échelle, écrans en HTML/CSS/JS sans dépendance, animations par étapes déclenchées
-  au clic ou au chrono, notes de l'orateur, sommaire, minuteur. Pensé pour une plénière de
-  30 à 45 minutes comme pour une vidéo de trois minutes. Contient un modèle qui fonctionne,
-  la méthode de vérification en navigateur, l'export vidéo avec bande son et la mise en
-  ligne. À utiliser quand on demande un support de présentation « pas un PowerPoint », un
-  motion design web, un slideshow animé, ou l'export vidéo d'un tel support.
+  Build an animated web presentation that behaves like slides: a fixed scaled
+  stage, screens in plain HTML/CSS/JS with no dependencies, step animations
+  driven by a click or by the clock, speaker notes, contents panel, timer.
+  Made for a 30 to 45 minute talk as much as for a three minute video. Ships a
+  working template, the browser verification method, video export with a
+  soundtrack, and deployment. Use it when someone asks for a presentation deck
+  that is "not a PowerPoint", a web motion design, an animated slideshow, or
+  the video export of one.
 ---
 
-# Présentation web animée
+# Animated web presentation
 
-Le but : un support qui a la tenue d'un motion design et la souplesse de slides.
-Pas de dépendance, pas de build, un fichier à ouvrir. On le pilote au clavier
-pendant une plénière, ou on le laisse dérouler seul pour en faire une vidéo.
+The goal: a deck with the finish of a motion design and the flexibility of
+slides. No dependencies, no build, one file to open. You drive it from the
+keyboard during a talk, or let it run on its own to make a video.
 
-> **Avant d'écrire quoi que ce soit, lire `references/redaction.md`.**
-> Un support de présentation orale est **très peu chargé** : une idée par écran,
-> quinze mots au maximum, un seul objet visuel, pas de liste à puces. L'écran ne
-> dit pas ce que l'orateur dit — il montre ce que la parole ne sait pas montrer.
-> C'est la contrainte qu'on relâche en premier et qui se voit le plus en salle.
-> `outils/audit.sh` la mesure, écran par écran.
+> **Read `references/writing.md` before writing anything.**
+> A deck that backs a talk is **very light**: one idea per slide, fifteen words
+> at most, a single visual object, no bullet lists. The screen does not say what
+> the speaker says — it shows what speech cannot show. This is the constraint
+> everyone drops first and the one the room notices most.
+> `tools/audit.sh` measures it, slide by slide.
 
-## Commencer
+## Start
 
 ```sh
-cp -r <ce-skill>/modele mon-support && cd mon-support
+cp -r <this-skill>/template my-deck && cd my-deck
 open index.html
 ```
 
-Le modèle fonctionne tel quel : cinq écrans, un compteur, une courbe, une grille
-de points, les notes de l'orateur et le sommaire. Il sert de socle, pas d'exemple
-à recopier : on remplace le contenu, on garde le moteur.
+The template works as it is: five slides, a counter, a curve, a dot grid,
+speaker notes and a contents panel. It is a foundation, not an example to copy:
+replace the content, keep the engine.
 
-**Tout le contenu est dans `data.js`.** C'est le seul fichier qu'une personne non
-technique doit ouvrir. Les chiffres, le déroulé, les notes, le rythme.
+**All the content lives in `data.js`.** That is the only file a non-technical
+person should ever open. Figures, running order, notes, pacing.
 
-## Les quatre décisions qui tiennent tout le reste
+## The four decisions everything else rests on
 
-**Un canvas fixe de 1600 × 900, mis à l'échelle par le JavaScript.** Rien ne se
-recompose : la mise en page est rigoureusement identique sur un portable, un
-vidéoprojecteur et un écran d'accueil. On dessine une fois, à une seule taille.
-C'est ce qui permet de placer les choses au pixel sans jamais tester dix largeurs.
+**A fixed 1600 × 900 stage, scaled by JavaScript.** Nothing reflows: the layout
+is identical on a laptop, a projector and a lobby screen. You lay things out
+once, at one size. That is what lets you place things to the pixel without ever
+testing ten widths.
 
-**Des scripts classiques, pas de modules ES.** C'est ce qui permet d'ouvrir le
-fichier en `file://` d'un double-clic, sans serveur. Sur le poste d'un orateur
-qui n'a ni Node ni réseau, ça compte.
+**Classic scripts, no ES modules.** That is what lets the file open from
+`file://` on a double click, with no server. On the machine of a speaker who has
+neither Node nor network, that matters.
 
-**Un seul fichier de contenu.** `data.js` porte les chiffres, le déroulé et les
-notes. Aucune valeur en dur dans le HTML : sinon deux chiffres divergent et
-personne ne s'en aperçoit avant la salle.
+**One content file.** `data.js` carries the figures, the running order and the
+notes. No value hardcoded in the HTML: otherwise two numbers drift apart and
+nobody notices before the room does.
 
-**Des étapes, pas un minutage.** Chaque écran déclare ses étapes. En mode
-présentateur elles avancent au clic, en mode auto elles suivent un chrono. Le
-même code d'écran sert aux deux. C'est ce qui rend le support réutilisable en
-vidéo sans le réécrire.
+**Steps, not a timeline.** Each slide declares its steps. In presenter mode they
+advance on a click, in auto mode they follow a clock. The same slide code serves
+both. That is what makes a deck reusable as a video without rewriting it.
 
-## Le fil de travail
+## The workflow
 
-1. **Écrire le déroulé dans `data.js`** avant toute ligne de CSS : les écrans,
-   les chapitres, le nombre d'étapes, les notes. Le contenu d'abord.
-   Ce qui se dit va dans les notes, ce qui se montre va sur l'écran.
-2. **Poser les écrans en HTML**, un `<section class="ecran" id="…">` par entrée.
-   Trois briques par écran : une affirmation courte, un objet visuel, une légende.
-3. **Animer par étapes.** Un élément porte `class="a" data-pas="2"` : il apparaît
-   à l'étape 2. Pour ce que le CSS ne sait pas faire, un hook `pas(s, n)`.
-4. **Passer l'audit de charge** : `outils/audit.sh`. Un écran signalé se scinde,
-   il ne se rétrécit pas.
-5. **Vérifier en navigateur, jamais en lisant le code.** Voir
-   `references/verification.md`. C'est la partie qu'on saute et qu'on regrette.
-6. **Exporter si besoin** : vidéo, bande son, mise en ligne. Voir
+1. **Write the running order in `data.js`** before a line of CSS: the slides,
+   the chapters, the number of steps, the notes. Content first.
+   What gets said goes in the notes, what gets shown goes on the slide.
+2. **Lay out the slides in HTML**, one `<section class="slide" id="…">` per
+   entry. Three blocks per slide: a short claim, a visual object, a caption.
+3. **Animate in steps.** An element carries `class="a" data-step="2"`: it appears
+   on step 2. For what CSS cannot do, a `step(s, n)` hook.
+4. **Pass the load audit**: `tools/audit.sh`. A flagged slide gets split, not
+   shrunk.
+5. **Verify in a browser, never by reading the code.** See
+   `references/verifying.md`. This is the part people skip and regret.
+6. **Export if needed**: video, soundtrack, deployment. See
    `references/export.md`.
 
-## Les références
+## The references
 
-| Fichier | Quand le lire |
+| File | When to read it |
 |---|---|
-| `references/redaction.md` | **En premier.** Ce qu'on met sur un écran, et ce qu'on n'y met pas |
-| `references/architecture.md` | Comprendre le moteur avant de le modifier |
-| `references/scenes.md` | Écrire un écran, animer, les pièges de dessin |
-| `references/pleniere.md` | Un support de 30 à 45 minutes, mode présentateur |
-| `references/verification.md` | **Avant de livrer quoi que ce soit** |
-| `references/export.md` | Vidéo, musique, mise en ligne S3 + CloudFront |
+| `references/writing.md` | **First.** What goes on a slide, and what does not |
+| `references/architecture.md` | Understand the engine before changing it |
+| `references/slides.md` | Write a slide, animate, the drawing traps |
+| `references/talks.md` | A 30 to 45 minute deck, presenter mode |
+| `references/verifying.md` | **Before shipping anything** |
+| `references/export.md` | Video, music, deployment on S3 + CloudFront |
 
-## Ce qui coûte cher quand on l'ignore
+## What costs a lot when ignored
 
-Ces cinq points viennent tous d'un bug réel, trouvé tard.
+Every one of these came from a real bug, found late.
 
-**Un élément animé doit être caché dans `entre()`, pas dans `construit()`.**
-`construit()` ne tourne qu'une fois. Au retour sur l'écran, l'élément est resté
-dans son état final et s'affiche en entier avant de se réanimer. Le symptôme
-classique : « le graphique apparaît d'un coup, disparaît, puis s'anime ».
+**An animated element must be hidden in `enter()`, not in `build()`.**
+`build()` only runs once. Coming back to the slide, the element is still in its
+final state and shows in full before animating again. The classic symptom: "the
+chart appears at once, disappears, then animates".
 
-**`[hidden]` ne masque rien si la règle CSS pose un `display`.** `#truc{display:flex}`
-gagne sur la règle du navigateur. Il faut écrire `#truc[hidden]{display:none}`.
-Vérifier avec `getComputedStyle`, pas avec la propriété `hidden`.
+**`[hidden]` hides nothing if a CSS rule sets a `display`.** `#thing{display:flex}`
+beats the browser rule. You have to write `#thing[hidden]{display:none}`. Check
+with `getComputedStyle`, not with the `hidden` property.
 
-**Une capture d'écran au repos ne prouve rien.** Les bugs vivent pendant
-l'animation. Il faut échantillonner des images à des instants précis.
+**A screenshot at rest proves nothing.** The bugs live during the animation. You
+have to sample frames at precise moments.
 
-**Tout script qui modifie un fichier doit vérifier son point d'ancrage.** Un
-`replace` qui ne trouve rien échoue en silence et on débogue une modification
-qui n'a jamais été écrite.
+**Every script that edits a file must assert its anchor.** A `replace` that
+matches nothing fails silently, and you end up debugging a change that was never
+written.
 
-**Un support dense passe inaperçu à l'écriture et se paie en salle.** L'agent qui
-rédige a tendance à remplir : trois chiffres au lieu d'un, une liste au lieu d'une
-phrase, la source sous le graphique. Passer `outils/audit.sh` avant de livrer, et
-scinder les écrans signalés plutôt que réduire le corps de texte.
+**A dense deck goes unnoticed while writing and is paid for in the room.** The
+agent doing the writing tends to fill: three figures instead of one, a list
+instead of a sentence, the source under the chart. Run `tools/audit.sh` before
+shipping, and split the flagged slides rather than shrinking the type.
 
-**Mesurer plutôt que juger à l'œil.** Le son se mesure en RMS, la synchronisation
-par corrélation, la fluidité en comptant les images figées. Et on valide la mesure
-elle-même sur un cas connu avant de lui faire confiance.
+**Measure instead of eyeballing.** Sound in RMS, sync by correlation, smoothness
+by counting frozen frames. And validate the measurement itself on a case whose
+answer you already know, before trusting it.

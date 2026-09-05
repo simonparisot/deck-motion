@@ -1,115 +1,112 @@
-# Le moteur
+# The engine
 
-Trois fichiers, plus le contenu. Aucune dépendance, aucun build.
+Three files, plus the content. No dependencies, no build.
 
 ```
-index.html    les <section> d'écran, le chrome, le sommaire
-styles.css    jetons de couleur, squelette, styles d'écran
-data.js       ← LE SEUL FICHIER DE CONTENU
-scenes.js     moteur, outils de dessin, hooks d'écran
-app.js        le lecteur : navigation, étapes, notes, minuteur
+index.html    the slide <section>s, the chrome, the contents panel
+styles.css    colour tokens, skeleton, slide styles
+data.js       ← THE ONLY CONTENT FILE
+scenes.js     engine, drawing helpers, slide hooks
+app.js        the player: navigation, steps, notes, timer
 ```
 
-## Le canvas fixe
+## The fixed stage
 
-`#scene` fait 1600 × 900 pixels, toujours. `app.js` calcule un facteur d'échelle
-et applique un `transform: scale()`. Tout le reste se mesure en pixels de ce
-canvas.
+`#stage` is 1600 × 900 pixels, always. `app.js` computes a scale factor and
+applies a `transform: scale()`. Everything else is measured in stage pixels.
 
 ```js
 var k = Math.min(window.innerWidth / 1600, window.innerHeight / 900);
-scene.style.transform = 'translate(-50%,-50%) scale(' + k + ')';
+stage.style.transform = 'translate(-50%,-50%) scale(' + k + ')';
 ```
 
-Le centrage se fait en `position:absolute; left:50%; top:50%` puis
-`translate(-50%,-50%)`. **Pas en grid ni en flex** : un enfant de 1600 px dans un
-conteneur plus étroit déborde au lieu de se centrer, et l'écran se retrouve
-décalé sur les petites fenêtres.
+Centring is `position:absolute; left:50%; top:50%` then
+`translate(-50%,-50%)`. **Not grid, not flex**: a 1600 px child in a narrower
+container overflows instead of centring, and the deck ends up offset in small
+windows.
 
-Conséquence pratique : on ne teste qu'une seule largeur. Ce qui est juste à
-1600 × 900 est juste partout.
+The practical consequence: you only ever test one width. What is right at
+1600 × 900 is right everywhere.
 
-## Le cycle de vie d'un écran
+## A slide's lifecycle
 
 ```js
-HOOKS.monEcran = {
-  construit: function (s) { /* une fois, à la première arrivée */ },
-  entre:     function (s) { /* à chaque arrivée : remise à zéro */ },
-  pas:       function (s, n, direct) { /* à chaque étape */ },
-  sort:      function (s) { /* en quittant */ }
+HOOKS.mySlide = {
+  build: function (s) { /* once, on first arrival */ },
+  enter: function (s) { /* every arrival: reset */ },
+  step:  function (s, n, instant) { /* on every step */ },
+  exit:  function (s) { /* on leaving */ }
 };
 ```
 
-`construit()` crée le DOM coûteux : SVG, grilles, listes. Il ne tourne qu'une
-fois, la construction est mise en cache.
+`build()` creates the expensive DOM: SVG, grids, lists. It runs once, the
+construction is cached.
 
-`entre()` **remet l'écran dans son état de départ**. C'est le point le plus
-important du moteur. Vider les compteurs, replier les tracés, éteindre les
-points. Tout ce qui doit repartir de zéro va ici, jamais dans `construit()`.
+`enter()` **puts the slide back to its starting state.** This is the most
+important point in the engine. Empty the counters, fold the paths back, unlight
+the dots. Everything that must restart from zero goes here, never in `build()`.
 
-`pas(s, n, direct)` reçoit le numéro d'étape. `direct` vaut `true` quand on
-revient en arrière : l'écran se rejoue jusqu'à l'étape visée, et les hooks
-peuvent alors poser la valeur finale sans réanimer.
+`step(s, n, instant)` gets the step number. `instant` is `true` when you go
+backwards: the slide replays up to the wanted step, and hooks can then drop the
+final value in without animating.
 
-Le moteur pose aussi la classe `pas-N` sur la `<section>` à chaque étape. Pour
-tout ce que le CSS sait faire, le hook `pas()` est inutile.
+The engine also puts a `step-N` class on the `<section>` at every step. For
+anything CSS can do, the `step()` hook is unnecessary.
 
-## Les étapes
+## Steps
 
-Dans `data.js` :
+In `data.js`:
 
 ```js
-{ id: 'contexte', titre: 'Le marché', chapitre: 'Introduction',
-  pas: [600, 2000, 3400], duree: 18,
-  notes: 'Le chiffre clé est le 96 %.' }
+{ id: 'market', title: 'The market', chapter: 'Introduction',
+  steps: [600, 2000, 3400], seconds: 18,
+  notes: 'The 96 % is the number that matters.' }
 ```
 
-`pas` est un tableau de délais en millisecondes. Sa **longueur** donne le nombre
-d'étapes ; ses **valeurs** ne servent qu'en mode auto. Un écran sans étape
-multiple déclare `pas: [400]`.
+`steps` is an array of delays in milliseconds. Its **length** is the number of
+steps; its **values** only matter in auto mode. A slide with a single step
+declares `steps: [400]`.
 
-Arriver sur un écran applique déjà l'étape 1. Un écran ne s'affiche donc jamais
-vide en attendant un clic.
+Arriving on a slide already applies step 1. A slide is never shown blank waiting
+for a click.
 
-## Les deux modes
+## The two modes
 
-`var MODE = 'presentateur'` ou `'auto'`, dans `data.js`.
+`var MODE = 'presenter'` or `'auto'`, in `data.js`.
 
-**presentateur** — `→` avance d'une étape, puis passe à l'écran suivant quand
-elles sont épuisées. `←` recule d'une étape, puis revient à l'écran précédent sur
-sa dernière étape. Pas de chrono.
+**presenter** — `→` moves one step, then to the next slide once they run out.
+`←` goes back a step, then to the previous slide on its last step. No clock.
 
-**auto** — les étapes se déclenchent sur leurs délais, l'écran change après
-`duree` secondes. C'est le mode vidéo.
+**auto** — steps fire on their delays, the slide changes after `seconds`. This is
+video mode.
 
-Le même code d'écran sert aux deux. C'est délibéré : un support de plénière doit
-pouvoir devenir une vidéo sans réécriture.
+The same slide code serves both. That is deliberate: a talk deck must be able to
+become a video without a rewrite.
 
-## Le tempo
+## The tempo
 
-`var TEMPO = 1.4` ralentit tout de 40 % : durées d'écran, délais d'étape,
-animations CSS. Il agit par deux chemins :
+`var TEMPO = 1.4` slows everything by 40 %: slide durations, step delays, CSS
+animations. It works through two paths:
 
-- en JS, `facteurTempo()` multiplie les `setTimeout` et les durées d'animation ;
-- en CSS, `app.js` pose `--tempo` sur `:root`, et les règles écrivent
+- in JS, `tempoFactor()` multiplies the `setTimeout` calls and animation
+  durations;
+- in CSS, `app.js` sets `--tempo` on `:root`, and rules write
   `animation-delay: calc(var(--d,0s) * var(--tempo,1))`.
 
-Un délai écrit en dur quelque part échappe au tempo et désynchronise tout le
-reste. Il n'y a pas d'exception acceptable.
+A delay hardcoded somewhere escapes the tempo and desynchronises everything
+else. There is no acceptable exception.
 
-## Le mouvement réduit
+## Reduced motion
 
-`?statique=1` dans l'URL, ou le réglage système « réduire les animations ».
-Chaque écran s'affiche directement dans son état final. Utile pour une diffusion
-sur écran d'accueil, pour les personnes sensibles au mouvement, et pour vérifier
-d'un coup d'œil que tous les états finaux sont corrects.
+`?static=1` in the URL, or the system "reduce motion" setting. Every slide shows
+straight in its final state. Useful for a lobby screen, for people sensitive to
+motion, and to check at a glance that every final state is correct.
 
-Les outils de dessin (`compteJusqua`, `tracePath`, `allumeRatio`) le gèrent déjà.
-Une animation écrite à la main doit le gérer aussi.
+The drawing helpers (`countTo`, `drawPath`, `litRatio`) already handle it. An
+animation written by hand has to handle it too.
 
-## Le chrome
+## The chrome
 
-Barre de progression cliquable en haut, boutons au survol en bas, minuteur en bas
-à droite, sommaire par chapitres, panneau de notes. Tout est en `position:fixed`,
-donc hors du canvas mis à l'échelle : le chrome garde sa taille réelle quelle que
-soit la fenêtre.
+Clickable progress bar at the top, buttons on hover at the bottom, timer bottom
+right, contents panel by chapter, notes panel. Everything is `position:fixed`, so
+outside the scaled stage: the chrome keeps its real size whatever the window.

@@ -1,115 +1,111 @@
-# Exporter : vidéo, musique, mise en ligne
+# Exporting: video, sound, deployment
 
-## Passer le support en mode vidéo
+## Switching the deck to video mode
 
 ```js
 var MODE = 'auto';
-var TEMPO = 1.6;      // le confort de lecture en salle n'est pas celui d'une vidéo
+var TEMPO = 1.6;      // reading comfort in a room is not reading comfort on video
 ```
 
-En mode auto, `duree` et les délais de `pas` reprennent leur sens. Un support de
-plénière converti tel quel défile trop vite : les étapes étaient calées sur la
-parole d'un orateur, pas sur la lecture d'un spectateur. Compter large.
+In auto mode, `seconds` and the `steps` delays take on meaning again. A talk deck
+converted as is runs too fast: the steps were paced against a speaker, not
+against a viewer. Be generous.
 
-Ajouter un **écran de lancement** dès qu'il y a du son : les navigateurs
-interdisent de démarrer un son sans geste de l'utilisateur, aucune page web n'y
-échappe. Un bouton qui lance l'image et le son ensemble règle le problème et
-garantit que le montage sonore est calé dès la première image.
+Add a **start screen** as soon as there is sound: browsers forbid starting audio
+without a user gesture, and no web page escapes that. A button that starts the
+picture and the sound together solves it, and guarantees the soundtrack is
+aligned from the first frame.
 
-## Fabriquer la vidéo
+## Making the video
 
-**Le meilleur résultat vient d'un enregistrement d'écran.** Mesuré sur un
-compteur qui défile, part d'images identiques à la précédente à 50 i/s :
+**The best result comes from a screen recording.** Measured on a running counter,
+share of frames identical to the previous one at 50 fps:
 
-| Méthode | Images figées |
+| Method | Frozen frames |
 |---|---|
-| Enregistrement d'écran | **19 %** |
-| Capture pilotée par l'horloge du navigateur | 57 % |
-| Capture par screencast | 72 % |
+| Screen recording | **19 %** |
+| Capture driving the browser clock | 57 % |
+| Plain screencast capture | 72 % |
 
-La raison : un enregistrement d'écran suit le rythme de l'affichage. Une capture
-pilotée depuis le navigateur renvoie des images que le compositeur n'a pas fini de
-composer. La commande qui forcerait une image composée par pas,
-`HeadlessExperimental.beginFrame`, a été retirée de Chromium ; `fromSurface:false`
-est pire encore. Le pilotage de l'horloge virtuelle fonctionne bien par ailleurs
-— le `requestAnimationFrame` tourne à 154 Hz virtuels — mais ne suffit pas.
+Why: a screen recording follows the display refresh. A capture driven from the
+browser returns frames the compositor has not finished composing. The call that
+would force one composited frame per step,
+`HeadlessExperimental.beginFrame`, was removed from Chromium;
+`fromSurface:false` is worse still. Driving the virtual clock works well in
+itself — `requestAnimationFrame` runs at 154 virtual Hz — but it is not enough.
 
-Donc : **enregistrer l'écran, puis monter le son dessus.**
+So: **record the screen, then lay the sound over it.**
 
 ```sh
-outils/mux-capture.sh enregistrement.mov
+./tools/mux-recording.sh recording.mov
 ```
 
-Le script trouve le calage tout seul : il rend 40 s de référence, dont il connaît
-l'image zéro par construction, et corrèle les courbes de luminance des deux
-sources. Sur des cas réels il retrouve le décalage à 20 ms près, avec une
-corrélation de 0,98 à 0,99. Il gère les deux sens — enregistrement démarré avant
-ou après la première image.
+The script finds the offset on its own: it renders 40 s of reference, whose frame
+zero it knows by construction, and correlates the two luminance curves. On real
+cases it recovers the offset to within 20 ms, with a correlation of 0.98 to 0.99.
+It handles both directions — a recording started before or after the first frame.
 
-`outils/build-video.sh` rend une vidéo sans passer par l'écran. Pratique pour
-vérifier, moins bon pour diffuser. `HORLOGE=1` active l'horloge pilotée.
+`tools/render-video.sh` renders a video without going through the screen. Handy
+for checking, worse for shipping. `CLOCK=1` turns on the driven clock.
 
-## Réglages d'encodage
+## Encoding settings
 
-Réduire une capture Retina en 1920 × 1080 avec un filtre Lanczos : c'est un
-sous-échantillonnage, l'image y gagne en netteté. Garder 60 images par seconde
-pour ne rien jeter des animations rapides.
+Downscale a Retina recording to 1920 × 1080 with a Lanczos filter: it is
+supersampling, so the picture gets sharper. Keep 60 frames per second so nothing
+is thrown away from fast animations.
 
-| Réglage | Résultat sur 3 minutes |
+| Setting | Result over 3 minutes |
 |---|---|
-| `crf 16` | ~45 Mo, la version à diffuser |
-| `crf 18` | ~30 Mo, pour partager |
-| `crf 20` | ~26 Mo, visiblement plus mou sur les aplats sombres |
+| `crf 16` | ~45 MB, the master |
+| `crf 18` | ~30 MB, for sharing |
+| `crf 20` | ~26 MB, visibly softer on dark flats |
 
-Les aplats sombres et les grilles de points fins sont ce qui souffre le plus.
-Comparer deux encodages en extrayant le **même instant** des deux et en regardant
-le détail à l'échelle 1:1 — pas la vidéo entière à l'œil.
+Dark flats and fine dot grids suffer most. Compare two encodings by pulling the
+**same instant** from both and looking at the detail at 1:1 — not by eyeballing
+the whole video.
 
-## La musique
+## The soundtrack
 
-`outils/build-musique.sh` monte un morceau sur la durée exacte du support. Le
-principe, si on doit le refaire à la main :
+`tools/build-music.sh` cuts a track to the exact length of the deck. The
+principle, if you ever have to do it by hand:
 
-**Repérer le tempo du morceau**, puis ne faire que des sauts d'un **nombre entier
-de mesures**. La pulsation reste alors continue et le raccord ne s'entend pas.
-Un morceau à 146,32 BPM a une mesure de 1,6402 s ; tous les sauts sont des
-multiples de cette valeur.
+**Find the track's tempo**, then only ever jump a **whole number of bars**. The
+pulse stays continuous and the join is inaudible. A track at 146.32 BPM has a bar
+of 1.6402 s; every jump is a multiple of that.
 
-**Choisir les points de raccord sur des niveaux voisins.** Mesurer le RMS de part
-et d'autre : un écart d'un décibel passe inaperçu, quatre s'entendent. Un
-fondu enchaîné de 1,2 s en puissance constante (`acrossfade=c1=qsin:c2=qsin`)
-suffit.
+**Pick join points at matching levels.** Measure the RMS on both sides: one
+decibel of difference passes unnoticed, four are audible. A 1.2 s equal-power
+crossfade (`acrossfade=c1=qsin:c2=qsin`) is enough.
 
-**Caler les moments forts sur le récit.** L'entrée du beat doit tomber sur
-l'écran qui révèle le sujet, la coda sur la conclusion. Si l'entrée arrive trop
-tôt, reboucler quelques mesures dans l'intro calme plutôt que d'ajouter du
-silence : c'est inaudible et ça décale tout ce qui suit.
+**Land the big moments on the story.** The beat should come in on the slide that
+reveals the subject, the coda on the closing slide. If the entry lands too early,
+loop a few bars back inside the quiet intro rather than adding silence: it is
+inaudible and it shifts everything after it.
 
-**Faire calculer les points par le script, pas à la main.** `build-musique.sh`
-lit les durées dans `data.js` : un changement de tempo ne demande qu'un
-relancement. Un montage calé en dur se désaccorde au premier ajustement.
+**Let the script compute the points, not you.** `build-music.sh` reads the
+lengths from `data.js`: a tempo change only needs a re-run. A soundtrack aligned
+by hand goes out of tune on the first adjustment.
 
-## Mettre en ligne
+## Deploying
 
-S3 privé plus CloudFront, un dossier par version :
+A private S3 bucket behind CloudFront, one folder per version:
 
 ```sh
-aws s3 sync ./support s3://bucket/dossier --delete \
+aws s3 sync ./deck s3://bucket/folder --delete \
   --exclude "*" --include "*.html" --content-type "text/html; charset=utf-8" \
   --cache-control "public, max-age=60, must-revalidate"
-# puis un sync par type, et enfin :
-aws cloudfront create-invalidation --distribution-id XXX --paths "/dossier/*"
+# then one sync per type, and finally:
+aws cloudfront create-invalidation --distribution-id XXX --paths "/folder/*"
 ```
 
-Trois choses qui coûtent quand on les oublie :
+Three things that cost you when forgotten:
 
-- **Synchroniser tous les types.** Un script qui ne liste que html, js et css
-  laisse les `.avif`, `.mp3` et `.jpg` en 403. On ne le voit qu'en production.
-- **Poser le bon `Content-Type`.** `aws s3 sync` en devine certains mal ; un
-  `.mp3` servi en `binary/octet-stream` ne se lit pas.
-- **Attendre la fin de l'invalidation** avant de vérifier, sinon on contrôle
-  l'ancienne version et on conclut à tort.
+- **Sync every type.** A script listing only html, js and css leaves `.avif`,
+  `.mp3` and `.jpg` returning 403. You only find out in production.
+- **Set the right `Content-Type`.** `aws s3 sync` guesses some of them badly; an
+  `.mp3` served as `binary/octet-stream` will not play.
+- **Wait for the invalidation to finish** before checking, or you verify the old
+  version and conclude wrongly.
 
-Chaque synchronisation avec `--delete` efface ce que le dossier contenait. Pour
-garder une version, la déployer dans un autre dossier plutôt que d'espérer s'en
-souvenir.
+Every `--delete` sync wipes what the folder held. To keep a version, deploy it to
+another folder rather than hoping to remember.

@@ -1,0 +1,157 @@
+/* Fixed 1600 × 900 stage, scaled by app.js.
+   Everything is measured in stage pixels: the layout never reflows, it is
+   identical from a laptop to a projector. */
+
+:root{
+  --bg-0:#0B0817;
+  --bg-1:#120E24;
+  --bg-2:#1D1439;
+
+  --key:#8BE9FD;            /* the subject, the hero figures */
+  --accent:#F1FA8C;         /* secondary data */
+  --alert:#FF6E6E;          /* warning, unfavourable comparison */
+
+  --ink:#FFFFFF;
+  --ink-2:rgba(255,255,255,.66);
+  --ink-3:rgba(255,255,255,.38);
+  --ink-4:rgba(255,255,255,.14);
+
+  --ease:cubic-bezier(.16,1,.3,1);
+  --pad-x:96px;
+  --pad-y:74px;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:var(--bg-0)}
+body{
+  font-family:"Inter","Helvetica Neue",Helvetica,-apple-system,BlinkMacSystemFont,
+              "Segoe UI",Roboto,Arial,sans-serif;
+  color:var(--ink);
+  font-variant-numeric:tabular-nums;
+  -webkit-font-smoothing:antialiased;
+}
+
+#frame{position:fixed;inset:0;overflow:hidden}
+#stage{
+  position:absolute;left:50%;top:50%;
+  width:1600px;height:900px;transform-origin:center center;
+  background:
+    radial-gradient(120% 90% at 78% 12%, rgba(139,233,253,.10) 0%, transparent 55%),
+    linear-gradient(155deg, var(--bg-2) 0%, var(--bg-1) 46%, var(--bg-0) 100%);
+  overflow:hidden;isolation:isolate;
+}
+
+/* ---- Slide skeleton ---- */
+.slide{
+  position:absolute;inset:0;z-index:10;
+  padding:var(--pad-y) var(--pad-x);
+  display:none;flex-direction:column;opacity:0;
+}
+.slide.is-active{display:flex;animation:slideIn .28s var(--ease) both}
+.slide.is-leaving{display:flex;animation:slideOut .2s ease both;z-index:9}
+@keyframes slideIn{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+@keyframes slideOut{from{opacity:1}to{opacity:0}}
+
+/* An element marked .a appears when its step class lands.
+   The --d delay is for auto mode; in presenter mode it stays at zero. */
+.a{opacity:0}
+.step-1 .a[data-step="1"],.step-2 .a[data-step="2"],.step-3 .a[data-step="3"],
+.step-4 .a[data-step="4"],.step-5 .a[data-step="5"],.step-6 .a[data-step="6"]{
+  animation:reveal .6s calc(var(--d,0s) * var(--tempo,1)) both var(--ease);
+}
+@keyframes reveal{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+
+/* ---- Type ---- */
+.title{font-size:56px;font-weight:700;line-height:1.1;letter-spacing:-.03em;max-width:1240px}
+.subtitle{font-size:27px;color:var(--ink-2);margin-top:16px;max-width:1100px}
+.hero{display:block;font-size:180px;font-weight:800;line-height:.88;
+  letter-spacing:-.045em;color:var(--key)}
+.figure{display:block;font-size:56px;font-weight:800;letter-spacing:-.03em;color:var(--key)}
+.caption{display:block;font-size:24px;font-weight:500;line-height:1.35;
+  color:var(--ink-2);margin-top:12px;max-width:380px}
+.row{display:flex;gap:70px;align-items:flex-end;margin-top:30px}
+.center{align-items:center;justify-content:center;text-align:center}
+
+/* ---- Dot grid ---- */
+.grid{display:grid;gap:7px;width:max-content}
+.grid .dot{width:12px;height:12px;border-radius:50%;
+  background:var(--ink-4);transition:background .35s var(--ease)}
+.grid .dot.lit{background:var(--key)}
+
+/* ---- Curve ---- */
+.chart{position:relative;height:300px;margin-top:auto}
+.chart svg{width:100%;height:100%;overflow:visible;color:var(--key)}
+.curve-area{fill:url(#curveArea)}
+.curve-line{fill:none;stroke:var(--key);stroke-width:3;
+  stroke-linecap:round;stroke-linejoin:round}
+.curve-axis{stroke:rgba(255,255,255,.12);stroke-width:1}
+.years{display:flex;justify-content:space-between;font-size:17px;color:var(--ink-3);margin-top:8px}
+
+/* ---- Chrome ---- */
+#chrome{position:fixed;inset:0;z-index:200;pointer-events:none}
+#progress{position:absolute;top:0;left:0;right:0;height:4px;display:flex;gap:2px;
+  pointer-events:auto;cursor:pointer;background:rgba(255,255,255,.07)}
+#progress i{flex:1 1 auto;background:rgba(255,255,255,.10);transition:background .25s}
+#progress i.done{background:rgba(139,233,253,.5)}
+#progress i.here{background:var(--key)}
+#progress:hover{height:8px;transition:height .15s}
+
+#controls{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);
+  display:flex;gap:6px;pointer-events:auto;opacity:0;transition:opacity .25s}
+body.show-ui #controls,#controls:hover{opacity:1}
+#controls button{width:38px;height:38px;border:0;border-radius:10px;cursor:pointer;
+  background:rgba(255,255,255,.09);color:var(--ink-2);
+  font:inherit;font-size:16px;display:grid;place-items:center;backdrop-filter:blur(6px)}
+#controls button:hover{background:var(--key);color:#12102A}
+
+#timer{position:absolute;right:26px;bottom:20px;font-size:14px;color:var(--ink-3);
+  font-variant-numeric:tabular-nums}
+#timer.over{color:var(--alert)}
+
+/* ---- Speaker notes ---- */
+#notes{position:fixed;z-index:250;left:0;right:0;bottom:0;
+  padding:18px 26px 20px;background:rgba(8,6,18,.94);backdrop-filter:blur(10px);
+  border-top:1px solid rgba(255,255,255,.12);
+  transform:translateY(101%);transition:transform .28s var(--ease)}
+body.with-notes #notes{transform:none}
+body.with-notes #stage{transform-origin:center 34%}
+#notes-head{display:flex;gap:20px;font-size:13px;color:var(--ink-3);margin-bottom:8px}
+#notes-text{font-size:19px;line-height:1.45;color:var(--ink);white-space:pre-wrap;
+  max-height:180px;overflow:auto}
+
+/* ---- Contents ---- */
+#toc{position:fixed;inset:0;z-index:300;overflow:auto;padding:48px;
+  background:rgba(8,6,18,.95);backdrop-filter:blur(10px)}
+#toc[hidden]{display:none}
+#toc-inner{max-width:960px;margin:0 auto}
+#toc h3{font-size:26px;font-weight:700;margin-bottom:20px}
+#toc-total{font-size:15px;font-weight:400;color:var(--ink-3);margin-left:12px}
+#toc-list{list-style:none;columns:2;column-gap:32px}
+#toc-list li{break-inside:avoid}
+.toc-chapter{font-size:13px;text-transform:uppercase;letter-spacing:.12em;
+  color:var(--key);margin:18px 0 8px;break-after:avoid}
+#toc-list li button{width:100%;text-align:left;display:flex;gap:14px;
+  padding:9px 12px;border:0;border-radius:9px;cursor:pointer;
+  background:transparent;color:var(--ink-2);font:inherit;font-size:17px}
+#toc-list li button:hover{background:rgba(255,255,255,.07);color:var(--ink)}
+#toc-list li.is-here button{background:rgba(139,233,253,.14);color:var(--ink)}
+#toc-list b{color:var(--ink-3);font-weight:600;min-width:26px}
+#toc-help{margin-top:28px;font-size:14px;color:var(--ink-3)}
+#toc-close{margin-top:22px;padding:10px 20px;border:0;border-radius:9px;cursor:pointer;
+  background:rgba(255,255,255,.10);color:var(--ink);font:inherit}
+kbd{font:inherit;font-size:12px;padding:2px 7px;border-radius:5px;
+  background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.14)}
+
+/* ---- Blackout, to take the room back ---- */
+body.blackout #frame,body.blackout #chrome{opacity:0;transition:opacity .2s}
+body.blackout{background:#000;cursor:none}
+
+/* ---- Reduced motion ---- */
+html.reduced *,html.reduced *::before,html.reduced *::after{
+  animation-duration:.01ms !important;animation-delay:0ms !important;
+  transition-duration:.01ms !important;transition-delay:0ms !important}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{
+    animation-duration:.01ms !important;animation-delay:0ms !important;
+    transition-duration:.01ms !important;transition-delay:0ms !important}
+}

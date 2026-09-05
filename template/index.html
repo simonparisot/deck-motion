@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Talk title</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div id="frame">
+  <div id="stage">
+
+    <!-- OPENING -->
+    <section class="slide center" id="opening">
+      <h1 class="title a" data-step="1">Talk title</h1>
+      <p class="subtitle a" data-step="1" style="--d:.3s">One line of subtitle</p>
+    </section>
+
+    <!-- THE MARKET -->
+    <section class="slide" id="market">
+      <h2 class="title a" data-step="1">Almost the whole market sits in one segment.</h2>
+      <div class="row" style="margin-top:auto;align-items:center;gap:90px">
+        <div class="grid"></div>
+        <div>
+          <span class="figure a" data-step="3" data-count></span>
+          <span class="caption a" data-step="3">of the companies in scope</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- THE GROWTH -->
+    <section class="slide" id="growth">
+      <!-- The title carries the conclusion, not the subject. See redaction.md. -->
+      <h2 class="title a" data-step="1">The rate has doubled in three years.</h2>
+      <p class="subtitle a" data-step="2">And it is still climbing.</p>
+      <div class="chart"></div>
+      <div class="years"><span class="year-start"></span><span class="year-end"></span></div>
+    </section>
+
+    <!-- THE RESULT -->
+    <section class="slide center" id="result">
+      <span class="hero" data-count></span>
+      <p class="subtitle a" data-step="2" style="max-width:820px">
+        accounts opened since launch.</p>
+    </section>
+
+    <!-- CLOSING -->
+    <section class="slide center" id="closing">
+      <h2 class="title a" data-step="1">This is only the start.</h2>
+      <p class="subtitle a" data-step="2">Thank you.</p>
+    </section>
+
+  </div><!-- /#stage -->
+</div><!-- /#frame -->
+
+<div id="chrome">
+  <div id="progress" role="progressbar" aria-label="Progress"></div>
+  <div id="controls">
+    <button type="button" data-action="prev" title="Previous (←)" aria-label="Previous">‹</button>
+    <button type="button" data-action="next" title="Next (→)" aria-label="Next">›</button>
+    <button type="button" data-action="notes" title="Notes (N)" aria-label="Notes">✎</button>
+    <button type="button" data-action="toc" title="Contents (S)" aria-label="Contents">☰</button>
+    <button type="button" data-action="full" title="Full screen (F)" aria-label="Full screen">⤢</button>
+  </div>
+  <div id="timer"></div>
+</div>
+
+<div id="notes">
+  <div id="notes-head"><span id="notes-where"></span><span id="notes-next"></span></div>
+  <p id="notes-text"></p>
+</div>
+
+<div id="toc" hidden>
+  <div id="toc-inner">
+    <h3>Contents<span id="toc-total"></span></h3>
+    <ol id="toc-list"></ol>
+    <p id="toc-help">
+      <kbd>→</kbd> <kbd>←</kbd> move · <kbd>N</kbd> notes · <kbd>S</kbd> contents ·
+      <kbd>B</kbd> blackout · <kbd>F</kbd> full screen · <kbd>R</kbd> restart
+    </p>
+    <button type="button" id="toc-close">Close</button>
+  </div>
+</div>
+
+<script src="data.js"></script>
+<script src="scenes.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
