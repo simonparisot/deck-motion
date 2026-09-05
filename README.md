@@ -81,3 +81,7 @@ diffusée à 17 000 personnes, puis retravaillée en support de plénière. Les
 chiffres cités dans les références — les taux d'images figées entre méthodes de
 capture, les seuils de compression, les corrélations de calage — sont des mesures
 faites sur ce projet, pas des estimations.
+
+## Licence
+
+MIT. Voir `LICENSE`.
