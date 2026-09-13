@@ -8,6 +8,22 @@ slides. No dependencies, no build, one file to open. You drive it from the
 keyboard during a 40 minute talk, or let it run on its own on a lobby
 screen.
 
+## Demo
+
+**[Open a full one-hour plenary deck](https://simonparisot.github.io/deck-motion/demo/)**
+
+Twenty-six screens for the annual seminar of a fintech that does not exist:
+an animated map of France, a Sankey diagram of the underwriting funnel,
+speaker notes, a contents panel, a timer. Every figure comes from one file.
+
+It was generated from [a single preparation note](docs/demo/sources/brief-seminaire.md),
+the kind anyone writes before a talk. That is the whole point of the skill:
+you write the substance, it builds the form, and it applies the editorial
+limits in `references/writing.md` while doing it.
+
+The deck and the note are in French, the skill is in English.
+Source in [`docs/demo/`](docs/demo/).
+
 ## Install
 
 ```sh

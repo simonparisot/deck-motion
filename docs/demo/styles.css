@@ -1,0 +1,426 @@
+/* Fixed 1600 × 900 stage, scaled by app.js.
+   Everything is measured in stage pixels: the layout never reflows, it is
+   identical from a laptop to a projector. */
+
+:root{
+  --bg-0:#06121A;
+  --bg-1:#0B1D28;
+  --bg-2:#123140;
+
+  /* Trois couleurs, trois sens, jamais autre chose.
+     menthe   = Sillage, nous, ce qu'on produit
+     ambre    = le contexte, le marché, l'argent qu'on emprunte
+     corail   = le risque, ce qui alerte */
+  --key:#2FE3B5;
+  --accent:#FFC04A;
+  --alert:#FF7A7A;
+
+  --ink:#FFFFFF;
+  --ink-2:rgba(255,255,255,.66);
+  --ink-3:rgba(255,255,255,.38);
+  --ink-4:rgba(255,255,255,.14);
+
+  --ease:cubic-bezier(.16,1,.3,1);
+  --pad-x:96px;
+  --pad-y:74px;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:var(--bg-0)}
+body{
+  font-family:"Inter","Helvetica Neue",Helvetica,-apple-system,BlinkMacSystemFont,
+              "Segoe UI",Roboto,Arial,sans-serif;
+  color:var(--ink);
+  font-variant-numeric:tabular-nums;
+  -webkit-font-smoothing:antialiased;
+}
+
+#frame{position:fixed;inset:0;overflow:hidden}
+#stage{
+  position:absolute;left:50%;top:50%;
+  width:1600px;height:900px;transform-origin:center center;
+  background:
+    radial-gradient(120% 90% at 78% 12%, rgba(47,227,181,.12) 0%, transparent 55%),
+    linear-gradient(155deg, var(--bg-2) 0%, var(--bg-1) 46%, var(--bg-0) 100%);
+  overflow:hidden;isolation:isolate;
+}
+
+/* ---- Slide skeleton ---- */
+.slide{
+  position:absolute;inset:0;z-index:10;
+  padding:var(--pad-y) var(--pad-x);
+  display:none;flex-direction:column;opacity:0;
+}
+.slide.is-active{display:flex;animation:slideIn .28s var(--ease) both}
+.slide.is-leaving{display:flex;animation:slideOut .2s ease both;z-index:9}
+@keyframes slideIn{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+@keyframes slideOut{from{opacity:1}to{opacity:0}}
+
+/* An element marked .a appears when its step class lands.
+   The --d delay is for auto mode; in presenter mode it stays at zero. */
+.a{opacity:0}
+.step-1 .a[data-step="1"],.step-2 .a[data-step="2"],.step-3 .a[data-step="3"],
+.step-4 .a[data-step="4"],.step-5 .a[data-step="5"],.step-6 .a[data-step="6"]{
+  animation:reveal .6s calc(var(--d,0s) * var(--tempo,1)) both var(--ease);
+}
+@keyframes reveal{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+
+/* ---- Type ---- */
+.title{font-size:56px;font-weight:700;line-height:1.1;letter-spacing:-.03em;max-width:1240px}
+.subtitle{font-size:27px;color:var(--ink-2);margin-top:16px;max-width:1100px}
+.hero{display:block;font-size:180px;font-weight:800;line-height:.88;
+  letter-spacing:-.045em;color:var(--key)}
+.figure{display:block;font-size:56px;font-weight:800;letter-spacing:-.03em;color:var(--key)}
+.caption{display:block;font-size:24px;font-weight:500;line-height:1.35;
+  color:var(--ink-2);margin-top:12px;max-width:380px}
+.row{display:flex;gap:70px;align-items:flex-end;margin-top:30px}
+.center{align-items:center;justify-content:center;text-align:center}
+
+/* ---- Dot grid ---- */
+.grid{display:grid;gap:7px;width:max-content}
+.grid .dot{width:12px;height:12px;border-radius:50%;
+  background:var(--ink-4);transition:background .35s var(--ease)}
+.grid .dot.lit{background:var(--key)}
+
+/* ---- Curve ---- */
+.chart{position:relative;height:300px;margin-top:auto}
+.chart svg{width:100%;height:100%;overflow:visible;color:var(--key)}
+.curve-area{fill:url(#curveArea)}
+.curve-line{fill:none;stroke:var(--key);stroke-width:3;
+  stroke-linecap:round;stroke-linejoin:round}
+.curve-axis{stroke:rgba(255,255,255,.12);stroke-width:1}
+.years{display:flex;justify-content:space-between;font-size:17px;color:var(--ink-3);margin-top:8px}
+
+/* ---- Chrome ---- */
+#chrome{position:fixed;inset:0;z-index:200;pointer-events:none}
+#progress{position:absolute;top:0;left:0;right:0;height:4px;display:flex;gap:2px;
+  pointer-events:auto;cursor:pointer;background:rgba(255,255,255,.07)}
+#progress i{flex:1 1 auto;background:rgba(255,255,255,.10);transition:background .25s}
+#progress i.done{background:rgba(47,227,181,.5)}
+#progress i.here{background:var(--key)}
+#progress:hover{height:8px;transition:height .15s}
+
+#controls{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);
+  display:flex;gap:6px;pointer-events:auto;opacity:0;transition:opacity .25s}
+body.show-ui #controls,#controls:hover{opacity:1}
+#controls button{width:38px;height:38px;border:0;border-radius:10px;cursor:pointer;
+  background:rgba(255,255,255,.09);color:var(--ink-2);
+  font:inherit;font-size:16px;display:grid;place-items:center;backdrop-filter:blur(6px)}
+#controls button:hover{background:var(--key);color:#06121A}
+
+#timer{position:absolute;right:26px;bottom:20px;font-size:14px;color:var(--ink-3);
+  font-variant-numeric:tabular-nums}
+#timer.over{color:var(--alert)}
+
+/* ---- Speaker notes ---- */
+#notes{position:fixed;z-index:250;left:0;right:0;bottom:0;
+  padding:18px 26px 20px;background:rgba(8,6,18,.94);backdrop-filter:blur(10px);
+  border-top:1px solid rgba(255,255,255,.12);
+  transform:translateY(101%);transition:transform .28s var(--ease)}
+body.with-notes #notes{transform:none}
+body.with-notes #stage{transform-origin:center 34%}
+#notes-head{display:flex;gap:20px;font-size:13px;color:var(--ink-3);margin-bottom:8px}
+#notes-text{font-size:19px;line-height:1.45;color:var(--ink);white-space:pre-wrap;
+  max-height:180px;overflow:auto}
+
+/* ---- Contents ---- */
+#toc{position:fixed;inset:0;z-index:300;overflow:auto;padding:48px;
+  background:rgba(8,6,18,.95);backdrop-filter:blur(10px)}
+#toc[hidden]{display:none}
+#toc-inner{max-width:960px;margin:0 auto}
+#toc h3{font-size:26px;font-weight:700;margin-bottom:20px}
+#toc-total{font-size:15px;font-weight:400;color:var(--ink-3);margin-left:12px}
+#toc-list{list-style:none;columns:2;column-gap:32px}
+#toc-list li{break-inside:avoid}
+.toc-chapter{font-size:13px;text-transform:uppercase;letter-spacing:.12em;
+  color:var(--key);margin:18px 0 8px;break-after:avoid}
+#toc-list li button{width:100%;text-align:left;display:flex;gap:14px;
+  padding:9px 12px;border:0;border-radius:9px;cursor:pointer;
+  background:transparent;color:var(--ink-2);font:inherit;font-size:17px}
+#toc-list li button:hover{background:rgba(255,255,255,.07);color:var(--ink)}
+#toc-list li.is-here button{background:rgba(47,227,181,.16);color:var(--ink)}
+#toc-list b{color:var(--ink-3);font-weight:600;min-width:26px}
+#toc-help{margin-top:28px;font-size:14px;color:var(--ink-3)}
+#toc-close{margin-top:22px;padding:10px 20px;border:0;border-radius:9px;cursor:pointer;
+  background:rgba(255,255,255,.10);color:var(--ink);font:inherit}
+kbd{font:inherit;font-size:12px;padding:2px 7px;border-radius:5px;
+  background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.14)}
+
+/* ---- Blackout, to take the room back ---- */
+body.blackout #frame,body.blackout #chrome{opacity:0;transition:opacity .2s}
+body.blackout{background:#000;cursor:none}
+
+/* ---- Reduced motion ---- */
+html.reduced *,html.reduced *::before,html.reduced *::after{
+  animation-duration:.01ms !important;animation-delay:0ms !important;
+  transition-duration:.01ms !important;transition-delay:0ms !important}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{
+    animation-duration:.01ms !important;animation-delay:0ms !important;
+    transition-duration:.01ms !important;transition-delay:0ms !important}
+}
+
+
+/* ═══════════════ Le support du séminaire ═══════════════
+   Tout ce qui suit est propre à ce deck. Le squelette au-dessus vient du
+   modèle et n'a pas été touché. */
+
+/* ---- Titres et respiration ---- */
+.title.big{font-size:92px;letter-spacing:-.04em;line-height:1.02;max-width:1340px}
+.title.giant{font-size:120px;letter-spacing:-.045em;line-height:.98;max-width:1400px}
+/* Sur un écran centré, le titre est écrit après le chiffre dans le HTML pour
+   que le chiffre reste le premier élément lu dans le code. order:-1 le remonte. */
+.title.over{order:-1;font-size:44px;color:var(--ink-2);font-weight:600;margin-bottom:38px;max-width:1200px}
+.slide.center .title.over{text-align:center}
+.caption.wide{max-width:1100px;font-size:25px;margin-top:26px}
+.slide.center .caption.wide{text-align:center}
+.aside{font-size:28px;color:var(--ink-3);margin-top:30px}
+.aside b{color:var(--ink-2);font-weight:700}
+.subtitle b{color:var(--ink);font-weight:700}
+
+/* ---- Marque ---- */
+.wordmark{display:flex;align-items:center;gap:14px;font-size:26px;font-weight:700;
+  letter-spacing:.02em;color:var(--ink-2);margin-bottom:34px}
+.wordmark i{display:block;width:34px;height:34px;border-radius:50%;
+  background:conic-gradient(from 210deg,var(--key),rgba(47,227,181,.15) 62%,var(--key))}
+
+/* ---- Écrans de chapitre ---- */
+.chapter-num{font-size:22px;font-weight:800;letter-spacing:.3em;color:var(--key);margin-bottom:28px}
+.slide.chapter{background:radial-gradient(90% 70% at 50% 46%,rgba(47,227,181,.09) 0%,transparent 62%)}
+
+/* ---- Chiffres ---- */
+.hero{font-size:200px}
+.hero.alert{color:var(--alert)}
+.hero.accent{color:var(--accent)}
+.figure{font-size:100px;line-height:.95;letter-spacing:-.04em}
+.figure.alert{color:var(--alert)}
+.figure.ghost{color:var(--ink-3)}
+.duo{margin-top:auto;margin-bottom:auto;display:flex;gap:120px;align-items:flex-start}
+.duo > div{display:flex;flex-direction:column;max-width:560px}
+.duo .caption{margin-top:18px;max-width:520px;font-size:26px}
+.duo .caption b{color:var(--ink);font-weight:700}
+
+/* ---- Les trois promesses ---- */
+.promises{margin-top:auto;margin-bottom:auto;display:flex;flex-direction:column;gap:34px}
+.promise{display:flex;align-items:baseline;gap:34px}
+.promise b{font-size:26px;font-weight:800;letter-spacing:.12em;color:var(--key);min-width:60px}
+.promise span{font-size:56px;font-weight:700;letter-spacing:-.03em;line-height:1.1}
+
+/* ---- Barres verticales ---- */
+.bars{margin-top:auto;display:flex;align-items:flex-end;gap:90px;height:440px;padding-left:20px}
+.bars.deux{gap:150px;padding-left:120px}
+.bars.quatre{gap:70px}
+.bar{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;
+  height:100%;width:210px}
+.bars.quatre .bar{width:240px}
+.bar b,.bar span{opacity:0;transition:opacity .45s var(--ease) .25s}
+.bar.on b,.bar.on span{opacity:1}
+.bar b{font-size:40px;font-weight:800;letter-spacing:-.03em;margin-bottom:14px;color:var(--ink-2)}
+.bar span{font-size:24px;color:var(--ink-3);margin-top:16px}
+.bar i{display:block;width:100%;height:0;border-radius:12px 12px 4px 4px;
+  background:var(--ink-4);transition:height .9s var(--ease)}
+.bar.on i{height:var(--h,50%)}
+.bar.nous i{background:var(--key)}
+.bar.nous b{color:var(--key)}
+.bar.alerte i{background:var(--alert)}
+.bar.alerte b{color:var(--alert)}
+/* La cible : un contour, pas un plein. Ce n'est pas encore arrivé. */
+.bar.cible i{background:rgba(47,227,181,.14);border:2px dashed rgba(47,227,181,.65)}
+.bar.cible b{color:var(--key)}
+
+/* ---- Histogramme mensuel ---- */
+.histo{margin-top:auto;display:flex;align-items:flex-end;gap:14px;height:430px}
+.hbar{flex:1 1 0;display:flex;flex-direction:column;justify-content:flex-end;height:100%}
+.hbar i{display:block;width:100%;height:0;border-radius:7px 7px 2px 2px;
+  background:rgba(255,255,255,.20);transition:height .7s var(--ease)}
+.hbar.on i{height:var(--h,50%)}
+.hbar.key i{background:var(--key)}
+.hbar span{font-size:20px;color:var(--ink-3);margin-top:14px;text-align:center}
+.hbar.key span{color:var(--key);font-weight:700}
+
+/* ---- Anneau ---- */
+.ring{margin-top:auto;margin-bottom:10px;display:flex;align-items:center;gap:90px}
+.ring-wrap{position:relative;flex:0 0 auto;width:340px;height:340px}
+.ring-wrap svg{width:340px;height:340px}
+.arc{stroke-linecap:butt}
+.arc.c1{stroke:var(--key)}
+.arc.c2{stroke:var(--accent)}
+.arc.c3{stroke:rgba(255,255,255,.42)}
+.arc.c4{stroke:rgba(255,255,255,.18)}
+.ring-centre{position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;pointer-events:none}
+.ring-centre b{font-size:76px;font-weight:800;letter-spacing:-.04em;color:var(--key);line-height:1}
+.ring-centre span{font-size:21px;color:var(--ink-3);margin-top:8px}
+.ring-legend{display:flex;flex-direction:column;gap:20px}
+.ring-legend .lg{display:flex;align-items:center;gap:16px;font-size:30px;font-weight:600;color:var(--ink-2)}
+.ring-legend .lg i{width:20px;height:20px;border-radius:5px;background:rgba(255,255,255,.3)}
+.ring-legend .c1 i{background:var(--key)}
+.ring-legend .c2 i{background:var(--accent)}
+.ring-legend .c3 i{background:rgba(255,255,255,.42)}
+.ring-legend .c4 i{background:rgba(255,255,255,.18)}
+.ring-etat{margin-left:auto;align-self:flex-end;font-size:28px;font-weight:700;
+  letter-spacing:-.01em;color:var(--ink-3);padding-bottom:12px}
+#api-mix.cible .ring-etat{color:var(--key)}
+
+/* ---- Cartes ---- */
+.cards{margin-top:auto;margin-bottom:auto;display:flex;gap:28px}
+.card{flex:1 1 0;padding:36px 32px 34px;border-radius:20px;
+  background:rgba(255,255,255,.05);border:1px solid var(--ink-4);
+  display:flex;flex-direction:column}
+.card b{font-size:22px;font-weight:800;letter-spacing:.14em;color:var(--ink-3);margin-bottom:26px}
+.card span{font-size:38px;font-weight:700;letter-spacing:-.025em;line-height:1.12}
+.card i{font-style:normal;font-size:23px;color:var(--ink-3);margin-top:18px;line-height:1.35}
+.card.card-key{background:rgba(47,227,181,.10);border-color:rgba(47,227,181,.4)}
+.card.card-key b,.card.card-key span{color:var(--key)}
+.cards.quatre .card span{font-size:33px}
+
+/* ---- L'équation ---- */
+.eq{margin-top:auto;margin-bottom:auto;display:flex;align-items:stretch;gap:26px}
+.eq-op{display:flex;align-items:center;font-size:52px;font-weight:300;color:var(--ink-3)}
+.eq-term{flex:1 1 0;display:flex;flex-direction:column;padding:30px 26px;border-radius:18px;
+  background:rgba(255,255,255,.04);border:1px solid var(--ink-4)}
+.eq-term b{font-size:62px;font-weight:800;letter-spacing:-.04em;line-height:1}
+.eq-term b.pos{color:var(--key)}
+.eq-term b.neg{color:var(--alert)}
+.eq-term span{font-size:26px;font-weight:700;margin-top:16px}
+
+/* ---- Un chiffre qui saute à un autre ---- */
+.jumps{margin-top:auto;margin-bottom:auto;display:flex;gap:120px}
+.jump{display:flex;flex-wrap:wrap;align-items:baseline;gap:20px}
+.jump em{font-style:normal;font-size:74px;font-weight:800;letter-spacing:-.04em;line-height:1}
+.jump .from{color:var(--ink-3)}
+.jump .to{color:var(--key)}
+.jump .jump-arrow{font-size:44px;font-weight:300;color:var(--ink-4)}
+.jump i{font-style:normal;flex:1 0 100%;font-size:23px;color:var(--ink-3);margin-top:14px}
+.jump.big{margin:0 auto;justify-content:center}
+.jump.big em{font-size:150px}
+.jump.big .jump-arrow{font-size:76px}
+.jump.big i{text-align:center;font-size:27px;margin-top:22px}
+#marge-2027 .jump.big{margin-top:46px;margin-bottom:auto}
+#equipe .jump.big{margin:14px auto 0}
+#equipe .subtitle{margin-top:26px;text-align:center}
+
+/* ---- Ce qu'on ne fait pas ---- */
+.strikes{margin-top:auto;margin-bottom:auto;display:flex;flex-direction:column;gap:30px}
+.strike span{position:relative;font-size:62px;font-weight:700;letter-spacing:-.03em;
+  color:var(--ink-3)}
+.strike span::after{content:"";position:absolute;left:-10px;right:-10px;top:54%;height:4px;
+  border-radius:2px;background:var(--alert);transform:scaleX(0);transform-origin:left center;
+  animation:barre .5s .35s var(--ease) forwards}
+@keyframes barre{to{transform:scaleX(1)}}
+html.reduced .strike span::after{animation:none;transform:scaleX(1)}
+
+/* ---- La bascule vidéo ---- */
+.cue{width:230px;height:230px;display:grid;place-items:center}
+.cue svg{width:150px;height:150px;fill:var(--key)}
+
+/* ---- Le programme de la journée, écran centré des paris ---- */
+
+
+/* ---- Taille minimale de lecture ----
+   L'audit mesure le plus petit corps de texte réellement rendu : rien en
+   dessous de 24 px sur la scène 1600 × 900, sinon la salle du fond ne lit pas.
+   Ces quatre règles rattrapent les endroits où le modèle descendait plus bas. */
+.years{font-size:25px;color:var(--ink-3)}
+.card i{font-size:25px}
+.jump i{font-size:25px}
+
+
+/* ---- Reprises après vérification en navigateur ----
+   Écran par écran, dans un vrai navigateur : ce qui suit corrige des cadrages,
+   pas des couleurs. */
+
+/* Deux chiffres qui se comparent : on les écarte aux deux bords du cadre,
+   sinon la moitié droite de l'écran reste vide. */
+
+/* Les barres se centrent, pour la même raison. */
+.bars{justify-content:center;padding-left:0}
+.bars.deux{gap:170px}
+
+/* La courbe du taux prend la hauteur des autres graphiques. */
+#taux .chart{height:430px}
+
+/* Les cartes ont un corps, même quand le texte est court. */
+.card{min-height:290px}
+
+/* L'anneau, son libellé d'état et sa légende, groupés et centrés. */
+.ring{margin-top:auto;margin-bottom:auto;justify-content:center;gap:130px}
+.ring-wrap{margin-bottom:52px}
+.ring-etat{position:absolute;left:-40px;right:-40px;bottom:-52px;margin:0;
+  text-align:center;padding:0;font-size:27px}
+
+/* Les trois coûts qui baissent tiennent chacun sur une ligne. */
+
+/* Lisibilité en salle : 0,40 de blanc passe mal sur un vidéoprojecteur dès
+   qu'il s'agit de phrases et non d'étiquettes d'axe. */
+.strike span{color:var(--ink-2)}
+.card i{color:var(--ink-2)}
+
+
+/* ═══════════════ Les deux graphiques ajoutés ═══════════════ */
+
+/* ---- Carte de France à bulles ----
+   Le contour se trace, le fond s'allume, puis les bulles arrivent de la plus
+   grosse à la plus petite. La surface des bulles porte le propos : aucun
+   chiffre n'est écrit sur la carte. */
+.cote{margin-top:auto;margin-bottom:auto;display:flex;align-items:center;gap:110px;width:100%}
+.map{flex:0 0 560px;height:580px}
+.map svg{width:100%;height:100%;overflow:visible}
+.fr-fond{fill:rgba(255,255,255,.045);opacity:0;transition:opacity .9s var(--ease)}
+.fr-fond.on{opacity:1}
+.fr-trait{stroke:rgba(255,255,255,.32);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
+.bulle{fill:var(--key);fill-opacity:.5;stroke:var(--key);stroke-width:2.5;
+  r:0;transition:r .55s var(--ease)}
+.bulle.on{r:var(--r)}
+.cote-texte{display:flex;flex-direction:column}
+.cote-texte .hero{font-size:172px}
+.cote-texte .subtitle{margin-top:6px}
+
+/* ---- Tunnel de souscription (Sankey) ----
+   Un flux principal qui se rétrécit, et ce qu'il perd qui descend. Les
+   largeurs sont proportionnelles, donc la perte se lit sans pourcentage. */
+.sankey{margin-top:26px;width:100%}
+.sankey svg{width:100%;height:auto;overflow:visible}
+.sankey .etape{opacity:0;transform:translateX(-26px);
+  transition:opacity .5s var(--ease),transform .65s var(--ease)}
+.sankey .etape.on{opacity:1;transform:none}
+.nd{fill:var(--key)}
+.nd-nom{fill:var(--ink-2);font-size:25px;font-weight:600}
+.flux{fill:var(--key);fill-opacity:.22}
+.perte{fill:rgba(255,255,255,.13)}
+.perte-nom{fill:var(--ink-3);font-size:24px}
+
+/* ---- Légende et chiffre, au pied d'un graphique ---- */
+.pied{display:flex;align-items:baseline;justify-content:space-between;gap:40px;margin-top:24px}
+.pied .caption{margin-top:0;max-width:1000px;font-size:25px}
+.pied .figure{font-size:84px;flex:0 0 auto}
+
+/* ---- L'équation, cinq termes désormais ---- */
+.eq-term{padding:26px 22px}
+.eq-term b{font-size:46px}
+.eq-term span{font-size:25px;font-weight:600;margin-top:14px}
+.eq-res{background:rgba(47,227,181,.10);border-color:rgba(47,227,181,.42)}
+.eq-op{font-size:44px}
+.kicker{font-size:22px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--key);margin-bottom:20px}
+.title b{color:var(--key);font-weight:800}
+
+/* ---- Les deux menaces : deux cartes, un seul chiffre ---- */
+#concurrence .card span{font-size:34px;color:var(--ink-2);font-weight:600}
+#concurrence .card span em{font-style:normal;font-weight:800;font-size:52px;
+  color:var(--alert);letter-spacing:-.03em}
+#concurrence .card span em.nous{color:var(--key)}
+#concurrence .cards{gap:48px}
+
+/* ---- Les deux sauts de valeur, seuls sur leur écran ---- */
+#risque-v3 .jump.big,#marge-2027 .jump.big{margin-top:auto;margin-bottom:auto}
+#risque-v3 .caption,#marge-2027 .caption{margin-bottom:20px}
+
+
+/* La carte, un peu plus grande, et un trait qui tient sur un vidéoprojecteur. */
+.cote{gap:80px}
+.map{flex:0 0 620px;height:620px}
+.fr-trait{stroke:rgba(255,255,255,.42);stroke-width:3}
+
+/* Le sur-titre est une phrase courte, pas une étiquette d'axe : 25 px minimum. */
+.kicker{font-size:25px}

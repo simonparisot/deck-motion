@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>deck-motion</title>
+<meta name="description" content="A Claude Code skill for animated web presentations that behave like slides. With a full one-hour demo deck.">
+<style>
+  :root{
+    --bg:#06121A; --bg-2:#0B1D28;
+    --key:#2FE3B5;
+    --ink:#fff; --ink-2:rgba(255,255,255,.70); --ink-3:rgba(255,255,255,.44); --ink-4:rgba(255,255,255,.14);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    min-height:100vh;background:
+      radial-gradient(90% 70% at 76% 8%, rgba(47,227,181,.13) 0%, transparent 56%),
+      linear-gradient(160deg,#123140 0%,var(--bg-2) 48%,var(--bg) 100%);
+    color:var(--ink);
+    font-family:"Inter","Helvetica Neue",Helvetica,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;line-height:1.5;
+    display:flex;align-items:center;justify-content:center;padding:56px 24px;
+  }
+  main{width:100%;max-width:720px}
+  .mark{display:flex;align-items:center;gap:13px;font-size:17px;font-weight:700;color:var(--ink-2);margin-bottom:30px}
+  .mark i{width:26px;height:26px;border-radius:50%;
+    background:conic-gradient(from 210deg,var(--key),rgba(47,227,181,.15) 62%,var(--key))}
+  h1{font-size:clamp(38px,7vw,60px);font-weight:800;letter-spacing:-.035em;line-height:1.04}
+  .lede{font-size:clamp(18px,2.6vw,21px);color:var(--ink-2);margin-top:20px;max-width:34em}
+  .actions{display:flex;flex-wrap:wrap;gap:14px;margin-top:38px}
+  a.btn{display:inline-block;padding:15px 26px;border-radius:12px;text-decoration:none;
+    font-size:17px;font-weight:700;transition:transform .15s ease,background .15s ease}
+  a.primary{background:var(--key);color:#06121A}
+  a.primary:hover{transform:translateY(-2px)}
+  a.ghost{background:rgba(255,255,255,.07);color:var(--ink);border:1px solid var(--ink-4)}
+  a.ghost:hover{background:rgba(255,255,255,.13)}
+  section{margin-top:52px;padding-top:32px;border-top:1px solid var(--ink-4)}
+  h2{font-size:15px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--key);margin-bottom:16px}
+  p{color:var(--ink-2);margin-bottom:14px}
+  p:last-child{margin-bottom:0}
+  ul{list-style:none;color:var(--ink-2)}
+  li{padding-left:20px;position:relative;margin-bottom:10px}
+  li::before{content:"";position:absolute;left:0;top:.62em;width:7px;height:7px;border-radius:50%;background:var(--key)}
+  code,kbd{font-family:"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;font-size:.88em;
+    background:rgba(255,255,255,.09);padding:2px 7px;border-radius:6px;color:var(--ink)}
+  pre{background:rgba(0,0,0,.30);border:1px solid var(--ink-4);border-radius:12px;
+    padding:18px 20px;overflow-x:auto;margin:16px 0}
+  pre code{background:none;padding:0;font-size:15px;line-height:1.7;color:var(--ink-2)}
+  a{color:var(--key)}
+  footer{margin-top:52px;padding-top:26px;border-top:1px solid var(--ink-4);
+    font-size:15px;color:var(--ink-3)}
+</style>
+</head>
+<body>
+<main>
+
+  <p class="mark"><i></i>deck-motion</p>
+
+  <h1>Presentations that behave like slides, and look like motion design.</h1>
+
+  <p class="lede">A skill for <a href="https://claude.com/claude-code">Claude Code</a>.
+  No dependencies, no build, one file to open. You drive it from the keyboard
+  during a talk, or let it run on its own on a lobby screen.</p>
+
+  <div class="actions">
+    <a class="btn primary" href="demo/">Open the demo deck</a>
+    <a class="btn ghost" href="https://github.com/simonparisot/deck-motion">Get the skill</a>
+  </div>
+
+  <section>
+    <h2>What the demo is</h2>
+    <p>A full one-hour opening plenary for the annual seminar of a fintech that
+    does not exist. Twenty-six screens, six chapters, an animated map of France,
+    a Sankey diagram of the underwriting funnel, speaker notes, a contents
+    panel and a timer.</p>
+    <p>It was generated from
+    <a href="https://github.com/simonparisot/deck-motion/blob/main/docs/demo/sources/brief-seminaire.md">one
+    preparation note</a>, the kind anyone writes before a talk: the numbers, the
+    running order, what the speaker wants the room to remember. Read the note,
+    then open the deck. That is the whole point of the skill.</p>
+    <p>The deck and the note are in French. The skill itself is in English.</p>
+  </section>
+
+  <section>
+    <h2>Driving it</h2>
+    <ul>
+      <li><kbd>&rarr;</kbd> moves one step, then one screen</li>
+      <li><kbd>N</kbd> speaker notes &middot; <kbd>S</kbd> contents &middot; <kbd>F</kbd> full screen</li>
+      <li><kbd>B</kbd> blacks the screen out, so the room looks at you</li>
+      <li><code>?static=1</code> drops every animation and shows the final states</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Install</h2>
+    <pre><code>git clone https://github.com/simonparisot/deck-motion.git \
+  ~/.claude/skills/deck-motion</code></pre>
+    <p>That is all. The skill loads itself when a request calls for it, or on
+    <code>/deck-motion</code>.</p>
+  </section>
+
+  <footer>MIT. Built with Claude Code.</footer>
+
+</main>
+</body>
+</html>
